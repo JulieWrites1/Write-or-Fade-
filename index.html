@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Write or Fade</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --black: #0a0a0a;
+  --white: #f5f0e8;
+  --red: #c0392b;
+  --red-dark: #922b21;
+  --gold: #d4a843;
+  --gray: #1e1e1e;
+  --gray-light: #888;
+  --success: #2ecc71;
+  --border: #2e2e2e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--black); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* LANDING */
+#screen-landing { justify-content: center; align-items: center; text-align: center; padding: 40px 24px; background: radial-gradient(ellipse at top, #1a0505 0%, #0a0a0a 60%); }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 18vw, 110px); line-height: 0.88; color: var(--white); margin-bottom: 12px; }
+.logo em { color: var(--red); font-style: normal; }
+.tagline { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-light); margin-bottom: 40px; }
+.landing-lines { margin-bottom: 48px; }
+.landing-lines p { font-size: 14px; color: #666; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+.landing-btns { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.trial-note { font-size: 11px; color: #555; margin-top: 20px; font-family: 'DM Mono', monospace; }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 14px 32px; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.15s; width: 220px; text-align: center; }
+.btn-red { background: var(--red); color: var(--white); }
+.btn-red:hover { background: var(--red-dark); }
+.btn-outline { background: transparent; color: var(--white); border: 1px solid #444; }
+.btn-outline:hover { border-color: var(--white); }
+.btn-gold { background: var(--gold); color: #000; font-weight: 700; }
+.btn-gold:hover { opacity: 0.9; }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: var(--red); color: var(--white); }
+.btn-block { width: 100%; }
+.btn-sm { padding: 10px 20px; font-size: 12px; width: auto; }
+
+/* AUTH */
+.auth-top { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+.auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+.auth-logo em { color: var(--red); font-style: normal; }
+.back-btn { background: none; border: none; color: var(--gray-light); font-size: 13px; cursor: pointer; font-family: 'DM Mono', monospace; padding: 4px 0; }
+.back-btn:hover { color: var(--white); }
+.auth-body { padding: 36px 24px; flex: 1; }
+.auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; margin-bottom: 4px; }
+.auth-sub { font-size: 13px; color: var(--gray-light); font-family: 'DM Mono', monospace; margin-bottom: 28px; }
+
+/* FORMS */
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-light); margin-bottom: 7px; font-family: 'DM Mono', monospace; }
+.field input, .field textarea { width: 100%; background: var(--gray); border: 1px solid var(--border); color: var(--white); padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; border-radius: 3px; outline: none; }
+.field input:focus, .field textarea:focus { border-color: var(--red); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field-hint { font-size: 11px; color: #555; margin-top: 5px; font-family: 'DM Mono', monospace; }
+.msg-error { background: rgba(192,57,43,0.12); border: 1px solid var(--red); color: #e74c3c; padding: 12px 14px; border-radius: 3px; font-size: 13px; margin-bottom: 16px; display: none; }
+.msg-ok { background: rgba(46,204,113,0.1); border: 1px solid var(--success); color: var(--success); padding: 12px 14px; border-radius: 3px; font-size: 13px; margin-bottom: 16px; display: none; }
+.switch-link { text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-light); }
+.switch-link button { background: none; border: none; color: var(--white); cursor: pointer; text-decoration: underline; font-size: 13px; font-family: 'DM Sans', sans-serif; }
+
+/* APP */
+.app-header { background: var(--black); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.app-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+.app-logo em { color: var(--red); font-style: normal; }
+.signout-btn { background: none; border: none; color: var(--gray-light); font-size: 12px; cursor: pointer; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+.signout-btn:hover { color: var(--white); }
+.app-body { flex: 1; padding: 20px; padding-bottom: 90px; }
+.app-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0f0f0f; border-top: 1px solid var(--border); display: flex; z-index: 50; }
+.nav-item { flex: 1; padding: 10px 4px; background: none; border: none; color: #555; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: color 0.15s; }
+.nav-item .ico { font-size: 17px; }
+.nav-item.on { color: var(--red); }
+.nav-item:hover { color: var(--white); }
+.tab { display: none; }
+.tab.on { display: block; }
+
+/* CARDS */
+.card { background: var(--gray); border: 1px solid var(--border); border-radius: 3px; padding: 18px; margin-bottom: 20px; }
+.section-head { font-family: 'Bebas Neue', sans-serif; font-size: 22px; margin-bottom: 16px; }
+.banner { border-radius: 3px; padding: 14px 16px; margin-bottom: 20px; display: none; }
+.banner.show { display: block; }
+.banner-trial { background: linear-gradient(135deg, #1a0808, #220d0d); border: 1px solid #5a1a1a; }
+.banner-trial h4 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--red); margin-bottom: 4px; }
+.banner-trial p { font-size: 12px; color: #888; margin-bottom: 10px; }
+.broadcast-card { border-left: 3px solid var(--gold); background: var(--gray); padding: 12px 16px; border-radius: 0 3px 3px 0; margin-bottom: 20px; display: none; }
+.broadcast-card.show { display: block; }
+.broadcast-label { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 5px; }
+.why-card { border-left: 3px solid var(--red); background: var(--gray); padding: 12px 16px; border-radius: 0 3px 3px 0; margin-bottom: 20px; display: none; }
+.why-card.show { display: block; }
+.why-label { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); margin-bottom: 5px; }
+.why-text { font-size: 14px; font-style: italic; }
+
+/* STREAK */
+.streak-block { text-align: center; padding: 28px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.streak-num { font-family: 'Bebas Neue', sans-serif; font-size: 100px; line-height: 1; color: #333; transition: color 0.3s; }
+.streak-num.alive { color: var(--gold); }
+.streak-lbl { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gray-light); margin-top: 4px; }
+.streak-msg { font-size: 13px; color: var(--red); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.stat-box { background: var(--gray); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 34px; line-height: 1; }
+.stat-lbl { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-light); margin-top: 3px; }
+
+/* PROGRESS */
+.prog-section { margin-bottom: 20px; }
+.prog-head { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.prog-title { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-light); }
+.prog-count { font-family: 'Bebas Neue', sans-serif; font-size: 18px; }
+.prog-bg { background: var(--gray); border-radius: 2px; height: 5px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--red); border-radius: 2px; transition: width 0.5s; }
+.prog-ticks { display: flex; justify-content: space-between; margin-top: 4px; }
+.prog-tick { font-size: 9px; font-family: 'DM Mono', monospace; color: #444; }
+
+/* WEEK DOTS */
+.week-dots { display: flex; gap: 6px; margin-top: 10px; justify-content: center; }
+.wdot { width: 36px; height: 36px; border-radius: 3px; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 8px; font-family: 'DM Mono', monospace; color: #555; text-transform: uppercase; gap: 1px; border: 1px solid var(--border); }
+.wdot.logged { background: var(--red); color: var(--white); border-color: var(--red); }
+.wdot.today { border-color: var(--gold); }
+
+/* LOG */
+.log-done { text-align: center; padding: 20px; display: none; }
+.log-done.show { display: block; }
+.log-done-icon { font-size: 36px; margin-bottom: 8px; }
+.log-done-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--success); }
+.log-done-sub { font-size: 12px; color: var(--gray-light); font-family: 'DM Mono', monospace; }
+.log-note-preview { font-size: 13px; color: #666; font-style: italic; margin-top: 10px; }
+
+/* HISTORY TABS */
+.history-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.history-tab { padding: 10px 20px; background: none; border: none; color: var(--gray-light); font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.history-tab.on { color: var(--white); border-bottom-color: var(--red); }
+.history-panel { display: none; }
+.history-panel.on { display: block; }
+
+/* MONTHLY HISTORY */
+.month-block { margin-bottom: 24px; }
+.month-block-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); margin-bottom: 4px; }
+.month-block-stats { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--gray-light); margin-bottom: 10px; }
+.month-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
+.cal-day { aspect-ratio: 1; border-radius: 2px; background: #1a1a1a; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: 'DM Mono', monospace; color: #444; }
+.cal-day.logged { background: var(--red); color: var(--white); border-color: var(--red); }
+.cal-day.empty { background: transparent; border-color: transparent; }
+
+/* LEADERBOARD */
+.lb-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.lb-item:last-child { border-bottom: none; }
+.lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 22px; width: 30px; text-align: center; color: #444; flex-shrink: 0; }
+.lb-rank.top { color: var(--gold); }
+.lb-info { flex: 1; }
+.lb-name { font-weight: 600; font-size: 14px; }
+.lb-days { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--gray-light); }
+.lb-streak-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--red); }
+
+/* ACHIEVEMENTS */
+.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ach-card { background: var(--gray); border: 1px solid var(--border); border-radius: 3px; padding: 14px 10px; text-align: center; opacity: 0.3; transition: opacity 0.2s; }
+.ach-card.earned { opacity: 1; border-color: var(--gold); }
+.ach-icon { font-size: 26px; margin-bottom: 5px; }
+.ach-name { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.05em; }
+.ach-desc { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--gray-light); }
+
+/* LOG ENTRIES */
+.log-entry { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.log-entry:last-child { border-bottom: none; }
+.log-date { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--gray-light); text-transform: uppercase; margin-bottom: 3px; }
+.log-text { font-size: 14px; }
+
+/* STARS */
+.star-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.star { font-size: 28px; background: none; border: none; cursor: pointer; opacity: 0.25; transition: opacity 0.15s, transform 0.15s; }
+.star.on { opacity: 1; }
+.star:hover { transform: scale(1.2); opacity: 1; }
+
+/* SETTINGS */
+.settings-group { margin-bottom: 28px; }
+.settings-group-title { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gray-light); padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+.settings-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.settings-key { font-size: 15px; font-weight: 500; }
+.settings-val { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--gray-light); margin-top: 2px; }
+
+/* PAYWALL */
+#screen-paywall { justify-content: center; align-items: center; padding: 40px 24px; text-align: center; background: radial-gradient(ellipse at top, #1a0505 0%, #0a0a0a 60%); }
+.pw-icon { font-size: 48px; margin-bottom: 14px; }
+.pw-title { font-family: 'Bebas Neue', sans-serif; font-size: 44px; margin-bottom: 6px; }
+.pw-price { font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--gold); line-height: 1; }
+.pw-period { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--gray-light); margin-bottom: 28px; }
+.pw-features { list-style: none; width: 100%; max-width: 300px; margin-bottom: 28px; text-align: left; }
+.pw-features li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; display: flex; gap: 10px; align-items: center; }
+.pw-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+
+/* TEACHER */
+.teacher-top { background: var(--black); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.teacher-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+.teacher-body { padding: 20px; padding-bottom: 40px; }
+.t-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.t-tab { padding: 9px 18px; background: none; border: none; color: var(--gray-light); font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.t-tab.on { color: var(--white); border-bottom-color: var(--red); }
+.t-panel { display: none; }
+.t-panel.on { display: block; }
+.student-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.s-name { font-weight: 600; font-size: 14px; }
+.s-email { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--gray-light); }
+.s-streak { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--red); }
+.badge { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+.badge-yes { background: rgba(46,204,113,0.12); color: var(--success); }
+.badge-no { background: rgba(192,57,43,0.12); color: var(--red); }
+
+/* UTILITY */
+.empty { text-align: center; padding: 36px 20px; font-family: 'DM Mono', monospace; font-size: 12px; color: #444; text-transform: uppercase; letter-spacing: 0.1em; }
+.loading-txt { text-align: center; padding: 36px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-light); text-transform: uppercase; letter-spacing: 0.1em; }
+.mt16 { margin-top: 16px; }
+.mb16 { margin-bottom: 16px; }
+.muted { color: var(--gray-light); }
+.sm { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="logo">Write<em>or</em><br>Fade.</div>
+  <p class="tagline">Writing Consistency App</p>
+  <div class="landing-lines">
+    <p>Miss a day. Lose your streak.</p>
+    <p>Every month is a fresh 30-day battle.</p>
+    <p>Your history never lies.</p>
+  </div>
+  <div class="landing-btns">
+    <button class="btn btn-red" id="btn-go-register">Start Writing</button>
+    <button class="btn btn-outline" id="btn-go-login">Sign In</button>
+  </div>
+  <p class="trial-note">First 20 students get 30 days free. Resets every 1st of the month.</p>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen">
+  <div class="auth-top">
+    <button class="back-btn" id="btn-login-back">← Back</button>
+    <div class="auth-logo">Write<em>or</em>Fade.</div>
+  </div>
+  <div class="auth-body">
+    <div class="auth-title">Welcome back.</div>
+    <div class="auth-sub">Your streak is waiting. Don't let it die.</div>
+    <div class="msg-error" id="login-err"></div>
+    <div class="field"><label>Email Address</label><input type="email" id="login-email" placeholder="you@email.com" /></div>
+    <div class="field"><label>Password</label><input type="password" id="login-pw" placeholder="••••••••" /></div>
+    <button class="btn btn-red btn-block" id="btn-login">Sign In</button>
+    <div class="switch-link mt16">No account? <button id="btn-login-to-reg">Register here</button></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="screen-register" class="screen">
+  <div class="auth-top">
+    <button class="back-btn" id="btn-reg-back">← Back</button>
+    <div class="auth-logo">Write<em>or</em>Fade. <span style="font-size:11px;color:#2ecc71;font-family:'DM Mono',monospace">✓ 30 Days Free</span></div>
+  </div>
+  <div class="auth-body">
+    <div class="auth-title">Join the challenge.</div>
+    <div class="auth-sub">30 days free. Then ₦1,500/month. Don't fade.</div>
+    <div class="msg-error" id="reg-err"></div>
+    <div class="msg-ok" id="reg-ok"></div>
+    <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="Your name" /></div>
+    <div class="field"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@email.com" /></div>
+    <div class="field"><label>Password</label><input type="password" id="reg-pw" placeholder="Min. 6 characters" /></div>
+    <div class="field">
+      <label>Why do you want to be a consistent writer?</label>
+      <textarea id="reg-why" placeholder="This is private. Only you can see it."></textarea>
+      <div class="field-hint">Private — never shown to anyone else.</div>
+    </div>
+    <button class="btn btn-red btn-block" id="btn-register">Create Account</button>
+    <div class="switch-link mt16">Already registered? <button id="btn-reg-to-login">Sign in</button></div>
+  </div>
+</div>
+
+<!-- PAYWALL -->
+<div id="screen-paywall" class="screen">
+  <div class="pw-icon">🔒</div>
+  <div class="pw-title">Your free access has ended.</div>
+  <div class="pw-price">₦1,500</div>
+  <div class="pw-period">per month — cancel anytime</div>
+  <ul class="pw-features">
+    <li>Unlimited streak tracking</li>
+    <li>Full monthly history and journal</li>
+    <li>Leaderboard access</li>
+    <li>Achievements and badges</li>
+    <li>Teacher broadcast messages</li>
+  </ul>
+  <button class="btn btn-gold btn-block" style="max-width:300px" id="btn-subscribe">Subscribe — ₦1,500/month</button>
+  <p class="muted sm mt16">No hidden fees.</p>
+  <button class="btn btn-outline btn-block mt16" style="max-width:300px" id="btn-paywall-signout">Sign Out</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="screen-app" class="screen">
+  <div class="app-header">
+    <div class="app-logo">Write<em>or</em>Fade.</div>
+    <button class="signout-btn" id="btn-app-signout">Sign Out</button>
+  </div>
+  <div class="app-body">
+
+    <!-- HOME -->
+    <div id="tab-home" class="tab on">
+      <div class="banner banner-trial" id="trial-banner">
+        <h4>⏰ Free access ending soon</h4>
+        <p id="trial-days-left">Subscribe to keep your streak.</p>
+        <button class="btn btn-gold btn-sm" id="btn-trial-upgrade">Go Premium — ₦1,500/mo</button>
+      </div>
+      <div class="broadcast-card" id="broadcast-card">
+        <div class="broadcast-label">📢 Instructor Broadcast</div>
+        <div id="broadcast-text"></div>
+      </div>
+      <div class="why-card" id="why-card">
+        <div class="why-label">Why You Write</div>
+        <div id="why-text"></div>
+      </div>
+      <div class="streak-block">
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-lbl">Current Streak</div>
+        <div class="streak-msg" id="streak-msg"></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="stat-logged">0</div><div class="stat-lbl">Days Logged</div></div>
+        <div class="stat-box"><div class="stat-val">30</div><div class="stat-lbl">Days This Month</div></div>
+      </div>
+      <div class="prog-section">
+        <div class="prog-head">
+          <span class="prog-title">Month Progress</span>
+          <span class="prog-count"><span id="prog-num">0</span>/30</span>
+        </div>
+        <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="prog-ticks"><span class="prog-tick">7d</span><span class="prog-tick">14d</span><span class="prog-tick">21d</span><span class="prog-tick">30d</span></div>
+      </div>
+      <div class="card">
+        <div class="section-head" style="font-size:16px;margin-bottom:10px">📊 This Week</div>
+        <div class="week-dots" id="week-dots"></div>
+      </div>
+      <div class="section-head">Today's Log</div>
+      <div class="card">
+        <div id="log-form">
+          <div class="field"><label>What did you write today?</label><textarea id="log-note" placeholder="Describe what you worked on..."></textarea></div>
+          <button class="btn btn-red btn-block" id="btn-log">Log Today's Writing →</button>
+        </div>
+        <div class="log-done" id="log-done">
+          <div class="log-done-icon">✅</div>
+          <div class="log-done-title">Logged for today.</div>
+          <div class="log-done-sub">Come back tomorrow. Don't break the chain.</div>
+          <div class="log-note-preview" id="log-note-preview"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+    <div id="tab-achievements" class="tab">
+      <div class="section-head">Achievements</div>
+      <div class="ach-grid">
+        <div class="ach-card" id="ach-1"><div class="ach-icon">✍️</div><div class="ach-name">First Log</div><div class="ach-desc">Logged day 1</div></div>
+        <div class="ach-card" id="ach-3"><div class="ach-icon">🔥</div><div class="ach-name">On Fire</div><div class="ach-desc">3-day streak</div></div>
+        <div class="ach-card" id="ach-7"><div class="ach-icon">⚡</div><div class="ach-name">Week Warrior</div><div class="ach-desc">7-day streak</div></div>
+        <div class="ach-card" id="ach-14"><div class="ach-icon">💪</div><div class="ach-name">Halfway</div><div class="ach-desc">14-day streak</div></div>
+        <div class="ach-card" id="ach-30"><div class="ach-icon">👑</div><div class="ach-name">Unstoppable</div><div class="ach-desc">30-day streak</div></div>
+        <div class="ach-card" id="ach-10d"><div class="ach-icon">📅</div><div class="ach-name">10 Days</div><div class="ach-desc">10 logs this month</div></div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="tab-leaderboard" class="tab">
+      <div class="section-head">Leaderboard</div>
+      <div id="lb-list"><div class="loading-txt">Loading...</div></div>
+    </div>
+
+    <!-- HISTORY — Daily + Monthly -->
+    <div id="tab-history" class="tab">
+      <div class="section-head">📓 History</div>
+      <div class="history-tabs">
+        <button class="history-tab on" data-panel="panel-daily">Daily Journal</button>
+        <button class="history-tab" data-panel="panel-monthly">Monthly History</button>
+      </div>
+      <div id="panel-daily" class="history-panel on">
+        <div id="daily-list"><div class="loading-txt">Loading...</div></div>
+      </div>
+      <div id="panel-monthly" class="history-panel">
+        <div id="monthly-list"><div class="loading-txt">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- RATE -->
+    <div id="tab-rate" class="tab">
+      <div class="section-head">Rate Write or Fade</div>
+      <p class="muted sm mb16">You're one of our founding students. Your honest review matters.</p>
+      <div id="review-form">
+        <div class="star-row">
+          <button class="star" data-star="1">⭐</button>
+          <button class="star" data-star="2">⭐</button>
+          <button class="star" data-star="3">⭐</button>
+          <button class="star" data-star="4">⭐</button>
+          <button class="star" data-star="5">⭐</button>
+        </div>
+        <div class="field"><label>Your Review</label><textarea id="review-text" placeholder="What do you think of Write or Fade?"></textarea></div>
+        <button class="btn btn-red btn-block" id="btn-review">Submit Review</button>
+      </div>
+      <div class="log-done" id="review-done">
+        <div class="log-done-icon">🙏</div>
+        <div class="log-done-title">Thank you!</div>
+        <div class="log-done-sub">Your feedback helps us make Write or Fade better.</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab">
+      <div class="section-head">Account Settings</div>
+      <div class="settings-group">
+        <div class="settings-group-title">Profile</div>
+        <div class="settings-row"><div class="settings-key" id="s-name">—</div><div class="settings-val" id="s-email">—</div></div>
+        <div class="settings-row"><div class="settings-key">Subscription</div><div class="settings-val" id="s-sub">—</div></div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">Danger Zone</div>
+        <p class="sm muted mb16">Permanently deletes your account, all logs, and streak history. Cannot be undone.</p>
+        <button class="btn btn-danger btn-block" id="btn-delete">Delete My Account</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="app-nav">
+    <button class="nav-item on" data-tab="home"><span class="ico">🏠</span>Home</button>
+    <button class="nav-item" data-tab="achievements"><span class="ico">🏆</span>Wins</button>
+    <button class="nav-item" data-tab="leaderboard"><span class="ico">📊</span>Board</button>
+    <button class="nav-item" data-tab="history"><span class="ico">📓</span>History</button>
+    <button class="nav-item" data-tab="rate"><span class="ico">⭐</span>Rate</button>
+    <button class="nav-item" data-tab="settings"><span class="ico">⚙️</span>Settings</button>
+  </div>
+</div>
+
+<!-- TEACHER -->
+<div id="screen-teacher" class="screen">
+  <div class="teacher-top">
+    <div class="teacher-title">Teacher Dashboard</div>
+    <button class="signout-btn" id="btn-teacher-signout">Sign Out</button>
+  </div>
+  <div class="teacher-body">
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-box"><div class="stat-val" id="t-total">0</div><div class="stat-lbl">Total Students</div></div>
+      <div class="stat-box"><div class="stat-val" id="t-logged">0</div><div class="stat-lbl">Logged Today</div></div>
+      <div class="stat-box"><div class="stat-val" id="t-avg">0</div><div class="stat-lbl">Avg Streak</div></div>
+      <div class="stat-box"><div class="stat-val" id="t-reviews">0</div><div class="stat-lbl">Reviews</div></div>
+    </div>
+    <div class="t-tabs">
+      <button class="t-tab on" data-panel="t-students">Students</button>
+      <button class="t-tab" data-panel="t-broadcast">Broadcast</button>
+      <button class="t-tab" data-panel="t-reviews">Reviews</button>
+    </div>
+    <div id="t-students" class="t-panel on"><div id="student-list"><div class="loading-txt">Loading...</div></div></div>
+    <div id="t-broadcast" class="t-panel">
+      <div class="field"><label>Message to all students</label><textarea id="broadcast-msg" placeholder="Type your message..." style="min-height:120px"></textarea></div>
+      <button class="btn btn-red btn-block" id="btn-broadcast">Send to All Students →</button>
+      <div class="msg-ok mt16" id="broadcast-ok"></div>
+    </div>
+    <div id="t-reviews" class="t-panel"><div id="reviews-list"><div class="loading-txt">Loading...</div></div></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const sb = createClient(
+  'https://cbojiplnuybclbotctep.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNib2ppcGxudXliY2xib3RjdGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNDU0ODQsImV4cCI6MjA5MzcyMTQ4NH0.rqkQc_vg0WEMYSC7xqG1m1-SAiOYdb8WUoWhFRVpApI'
+);
+
+let USER = null, PROFILE = null, RATING = 0;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// APP NAV TABS
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('on'));
+    document.getElementById('tab-' + tab).classList.add('on');
+    btn.classList.add('on');
+    if (tab === 'leaderboard') loadLeaderboard();
+    if (tab === 'history') loadDaily();
+    if (tab === 'achievements') loadAchievements();
+    if (tab === 'settings') loadSettings();
+  });
+});
+
+// HISTORY TABS
+document.querySelectorAll('.history-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = btn.dataset.panel;
+    document.querySelectorAll('.history-tab').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.history-panel').forEach(p => p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById(panel).classList.add('on');
+    if (panel === 'panel-daily') loadDaily();
+    if (panel === 'panel-monthly') loadMonthly();
+  });
+});
+
+// TEACHER TABS
+document.querySelectorAll('.t-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = btn.dataset.panel;
+    document.querySelectorAll('.t-tab').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.t-panel').forEach(p => p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById(panel).classList.add('on');
+    if (panel === 't-students') loadStudents();
+    if (panel === 't-reviews') loadTeacherReviews();
+  });
+});
+
+// NAVIGATION
+document.getElementById('btn-go-register').addEventListener('click', () => show('screen-register'));
+document.getElementById('btn-go-login').addEventListener('click', () => show('screen-login'));
+document.getElementById('btn-login-back').addEventListener('click', () => show('screen-landing'));
+document.getElementById('btn-reg-back').addEventListener('click', () => show('screen-landing'));
+document.getElementById('btn-login-to-reg').addEventListener('click', () => show('screen-register'));
+document.getElementById('btn-reg-to-login').addEventListener('click', () => show('screen-login'));
+document.getElementById('btn-trial-upgrade').addEventListener('click', () => show('screen-paywall'));
+document.getElementById('btn-subscribe').addEventListener('click', () => alert('Payment coming soon. Contact your instructor to activate premium access.'));
+
+async function signOut() {
+  await sb.auth.signOut();
+  USER = null; PROFILE = null;
+  show('screen-landing');
+}
+document.getElementById('btn-app-signout').addEventListener('click', signOut);
+document.getElementById('btn-paywall-signout').addEventListener('click', signOut);
+document.getElementById('btn-teacher-signout').addEventListener('click', signOut);
+
+// REGISTER
+document.getElementById('btn-register').addEventListener('click', async () => {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  const why = document.getElementById('reg-why').value.trim();
+  const err = document.getElementById('reg-err');
+  const ok = document.getElementById('reg-ok');
+  err.style.display = 'none'; ok.style.display = 'none';
+  if (!name || !email || !pw) { err.textContent = 'Please fill in all fields.'; err.style.display = 'block'; return; }
+  if (pw.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
+  const { data, error } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: { full_name: name, why_write: why } }
+  });
+  if (error) { err.textContent = error.message; err.style.display = 'block'; return; }
+  if (data.user) {
+    await sb.from('profiles').upsert({
+      id: data.user.id, name, email,
+      why_write: why, is_subscribed: false,
+      is_teacher: false, trial_start: new Date().toISOString()
+    });
+  }
+  ok.textContent = 'Account created! Check your email to confirm, then sign in.';
+  ok.style.display = 'block';
+});
+
+// LOGIN
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-err');
+  err.style.display = 'none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) { err.textContent = 'Invalid email or password.'; err.style.display = 'block'; return; }
+  USER = data.user;
+  await routeUser();
+});
+
+// ROUTE USER
+async function routeUser() {
+  // Try to get profile
+  let { data: profile } = await sb.from('profiles').select('*').eq('id', USER.id).single();
+
+  // If no profile exists, create one automatically
+  if (!profile) {
+    await sb.from('profiles').upsert({
+      id: USER.id,
+      name: USER.user_metadata?.full_name || USER.email.split('@')[0],
+      email: USER.email,
+      why_write: USER.user_metadata?.why_write || '',
+      is_subscribed: false,
+      is_teacher: false,
+      trial_start: new Date().toISOString()
+    });
+    const { data: newProfile } = await sb.from('profiles').select('*').eq('id', USER.id).single();
+    profile = newProfile;
+  }
+
+  if (!profile) { await signOut(); return; }
+  PROFILE = profile;
+
+  if (profile.is_teacher) { show('screen-teacher'); loadStudents(); return; }
+
+  const trialStart = profile.trial_start ? new Date(profile.trial_start) : null;
+  const daysUsed = trialStart ? (new Date() - trialStart) / 86400000 : 999;
+
+  if (!profile.is_subscribed && daysUsed > 30) { show('screen-paywall'); return; }
+
+  if (!profile.is_subscribed && daysUsed <= 30) {
+    const daysLeft = Math.ceil(30 - daysUsed);
+    document.getElementById('trial-banner').classList.add('show');
+    document.getElementById('trial-days-left').textContent = daysLeft + ' days left in your free trial.';
+  }
+
+  show('screen-app');
+  loadHome();
+}
+
+// STREAK CALC
+function calcStreak(logs) {
+  if (!logs || !logs.length) return 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dates = [...new Set(logs.map(l => {
+    const d = new Date(l.logged_at); d.setHours(0,0,0,0); return d.getTime();
+  }))].sort((a,b) => b-a);
+  if (dates[0] !== today.getTime() && dates[0] !== today.getTime() - 86400000) return 0;
+  let streak = 0, check = dates[0];
+  for (const d of dates) { if (d === check) { streak++; check -= 86400000; } else break; }
+  return streak;
+}
+
+// HOME
+async function loadHome() {
+  if (PROFILE.why_write) {
+    document.getElementById('why-text').textContent = '"' + PROFILE.why_write + '"';
+    document.getElementById('why-card').classList.add('show');
+  }
+  const today = new Date().toISOString().split('T')[0];
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const { data: todayLog } = await sb.from('daily_logs').select('*').eq('user_id', USER.id).gte('logged_at', today + 'T00:00:00').lte('logged_at', today + 'T23:59:59').maybeSingle();
+  const { data: monthLogs } = await sb.from('daily_logs').select('logged_at, note').eq('user_id', USER.id).gte('logged_at', monthStart).order('logged_at', { ascending: false });
+  const logs = monthLogs || [];
+  const streak = calcStreak(logs);
+  const el = document.getElementById('streak-num');
+  el.textContent = streak;
+  streak > 0 ? el.classList.add('alive') : el.classList.remove('alive');
+  document.getElementById('streak-msg').textContent = (!todayLog && streak === 0 && logs.length > 0) ? 'Your streak is gone. 💔 Start again today.' : '';
+  const days = logs.length;
+  document.getElementById('stat-logged').textContent = days;
+  document.getElementById('prog-num').textContent = days;
+  document.getElementById('prog-fill').style.width = Math.min((days / 30) * 100, 100) + '%';
+
+  // Week dots
+  const container = document.getElementById('week-dots');
+  container.innerHTML = '';
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const logDates = logs.map(l => new Date(l.logged_at).toISOString().split('T')[0]);
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const dot = document.createElement('div');
+    dot.className = 'wdot' + (logDates.includes(ds) ? ' logged' : '') + (i === 0 ? ' today' : '');
+    dot.innerHTML = '<span>' + dayNames[d.getDay()] + '</span><span>' + d.getDate() + '</span>';
+    container.appendChild(dot);
+  }
+
+  if (todayLog) {
+    document.getElementById('log-form').style.display = 'none';
+    document.getElementById('log-done').classList.add('show');
+    if (todayLog.note) document.getElementById('log-note-preview').textContent = todayLog.note;
+  } else {
+    document.getElementById('log-form').style.display = 'block';
+    document.getElementById('log-done').classList.remove('show');
+  }
+
+  const { data: bc } = await sb.from('broadcasts').select('message').order('created_at', { ascending: false }).limit(1);
+  if (bc && bc.length) {
+    document.getElementById('broadcast-text').textContent = bc[0].message;
+    document.getElementById('broadcast-card').classList.add('show');
+  }
+}
+
+// LOG TODAY
+document.getElementById('btn-log').addEventListener('click', async () => {
+  const note = document.getElementById('log-note').value.trim();
+  const today = new Date().toISOString().split('T')[0];
+  const { data: ex } = await sb.from('daily_logs').select('id').eq('user_id', USER.id).gte('logged_at', today + 'T00:00:00').lte('logged_at', today + 'T23:59:59').maybeSingle();
+  if (ex) { document.getElementById('log-form').style.display = 'none'; document.getElementById('log-done').classList.add('show'); return; }
+  const { error } = await sb.from('daily_logs').insert({ user_id: USER.id, note: note || null, logged_at: new Date().toISOString() });
+  if (error) { alert('Could not save. Try again.'); return; }
+  document.getElementById('log-form').style.display = 'none';
+  document.getElementById('log-done').classList.add('show');
+  if (note) document.getElementById('log-note-preview').textContent = note;
+  loadHome();
+});
+
+// DAILY JOURNAL
+async function loadDaily() {
+  const el = document.getElementById('daily-list');
+  el.innerHTML = '<div class="loading-txt">Loading...</div>';
+  const { data: logs } = await sb.from('daily_logs').select('logged_at, note').eq('user_id', USER.id).order('logged_at', { ascending: false }).limit(90);
+  if (!logs || !logs.length) { el.innerHTML = '<div class="empty">No logs yet. Start writing today.</div>'; return; }
+  el.innerHTML = '';
+  logs.forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    const d = new Date(l.logged_at);
+    div.innerHTML = '<div class="log-date">' + d.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + '</div><div class="log-text">' + (l.note || '(No note added)') + '</div>';
+    el.appendChild(div);
+  });
+}
+
+// MONTHLY HISTORY
+async function loadMonthly() {
+  const el = document.getElementById('monthly-list');
+  el.innerHTML = '<div class="loading-txt">Loading...</div>';
+  const { data: logs } = await sb.from('daily_logs').select('logged_at').eq('user_id', USER.id).order('logged_at', { ascending: false });
+  if (!logs || !logs.length) { el.innerHTML = '<div class="empty">No history yet.</div>'; return; }
+
+  // Group by month
+  const byMonth = {};
+  logs.forEach(l => {
+    const d = new Date(l.logged_at);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(d.getDate());
+  });
+
+  el.innerHTML = '';
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  Object.keys(byMonth).sort((a,b) => b.localeCompare(a)).forEach(key => {
+    const [year, month] = key.split('-').map(Number);
+    const loggedDays = byMonth[key];
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const streak = loggedDays.length;
+
+    const block = document.createElement('div');
+    block.className = 'month-block';
+
+    // Calendar grid
+    let calHTML = '<div class="month-calendar">';
+    // Day headers
+    ['S','M','T','W','T','F','S'].forEach(d => {
+      calHTML += '<div class="cal-day" style="background:transparent;border:none;color:#444;font-size:8px">' + d + '</div>';
+    });
+    // Empty cells for offset
+    for (let i = 0; i < firstDay; i++) {
+      calHTML += '<div class="cal-day empty"></div>';
+    }
+    // Days
+    for (let d = 1; d <= daysInMonth; d++) {
+      const isLogged = loggedDays.includes(d);
+      calHTML += '<div class="cal-day' + (isLogged ? ' logged' : '') + '">' + d + '</div>';
+    }
+    calHTML += '</div>';
+
+    block.innerHTML =
+      '<div class="month-block-title">' + monthNames[month - 1] + ' ' + year + '</div>' +
+      '<div class="month-block-stats">' + streak + ' days logged — ' + Math.round((streak / daysInMonth) * 100) + '% consistency</div>' +
+      calHTML;
+
+    el.appendChild(block);
+  });
+}
+
+// LEADERBOARD
+async function loadLeaderboard() {
+  const el = document.getElementById('lb-list');
+  el.innerHTML = '<div class="loading-txt">Loading...</div>';
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const { data: profiles } = await sb.from('profiles').select('id, name').eq('is_teacher', false);
+  if (!profiles || !profiles.length) { el.innerHTML = '<div class="empty">No students yet</div>'; return; }
+  const { data: logs } = await sb.from('daily_logs').select('user_id, logged_at').gte('logged_at', monthStart);
+  const byUser = {};
+  (logs || []).forEach(l => { if (!byUser[l.user_id]) byUser[l.user_id] = []; byUser[l.user_id].push(l); });
+  const ranked = profiles.map(p => ({ name: p.name, id: p.id, streak: calcStreak(byUser[p.id] || []), days: (byUser[p.id] || []).length })).sort((a,b) => b.streak - a.streak || b.days - a.days);
+  el.innerHTML = '';
+  ranked.forEach((u, i) => {
+    const div = document.createElement('div');
+    div.className = 'lb-item';
+    div.innerHTML = '<div class="lb-rank ' + (i < 3 ? 'top' : '') + '">' + (i+1) + '</div><div class="lb-info"><div class="lb-name">' + u.name + (u.id === USER.id ? ' (you)' : '') + '</div><div class="lb-days">' + u.days + ' days logged</div></div><div class="lb-streak-val">' + u.streak + '</div>';
+    el.appendChild(div);
+  });
+}
+
+// ACHIEVEMENTS
+async function loadAchievements() {
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const { data: logs } = await sb.from('daily_logs').select('logged_at').eq('user_id', USER.id).gte('logged_at', monthStart);
+  const streak = calcStreak(logs || []);
+  const days = (logs || []).length;
+  if (days >= 1) document.getElementById('ach-1').classList.add('earned');
+  if (streak >= 3) document.getElementById('ach-3').classList.add('earned');
+  if (streak >= 7) document.getElementById('ach-7').classList.add('earned');
+  if (streak >= 14) document.getElementById('ach-14').classList.add('earned');
+  if (streak >= 30) document.getElementById('ach-30').classList.add('earned');
+  if (days >= 10) document.getElementById('ach-10d').classList.add('earned');
+}
+
+// SETTINGS
+function loadSettings() {
+  document.getElementById('s-name').textContent = PROFILE.name || '—';
+  document.getElementById('s-email').textContent = PROFILE.email || '—';
+  document.getElementById('s-sub').textContent = PROFILE.is_subscribed ? 'Premium — Active' : 'Free Trial';
+}
+
+// STARS
+document.querySelectorAll('.star').forEach(btn => {
+  btn.addEventListener('click', () => {
+    RATING = parseInt(btn.dataset.star);
+    document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < RATING));
+  });
+});
+
+// REVIEW
+document.getElementById('btn-review').addEventListener('click', async () => {
+  if (!RATING) { alert('Please select a star rating.'); return; }
+  const text = document.getElementById('review-text').value.trim();
+  const { error } = await sb.from('reviews').insert({ user_id: USER.id, rating: RATING, review_text: text || null });
+  if (error) { alert('Could not submit. Try again.'); return; }
+  document.getElementById('review-form').style.display = 'none';
+  document.getElementById('review-done').classList.add('show');
+});
+
+// DELETE ACCOUNT
+document.getElementById('btn-delete').addEventListener('click', async () => {
+  if (!confirm('Are you sure? This permanently deletes all your data.')) return;
+  const typed = prompt('Type DELETE to confirm:');
+  if (typed !== 'DELETE') { alert('Cancelled.'); return; }
+  await sb.from('daily_logs').delete().eq('user_id', USER.id);
+  await sb.from('reviews').delete().eq('user_id', USER.id);
+  await sb.from('profiles').delete().eq('id', USER.id);
+  await sb.auth.signOut();
+  USER = null; PROFILE = null;
+  show('screen-landing');
+});
+
+// TEACHER: STUDENTS
+async function loadStudents() {
+  const el = document.getElementById('student-list');
+  el.innerHTML = '<div class="loading-txt">Loading...</div>';
+  const today = new Date().toISOString().split('T')[0];
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const { data: profiles } = await sb.from('profiles').select('id, name, email').eq('is_teacher', false);
+  if (!profiles || !profiles.length) { el.innerHTML = '<div class="empty">No students yet</div>'; document.getElementById('t-total').textContent = 0; return; }
+  const { data: todayLogs } = await sb.from('daily_logs').select('user_id').gte('logged_at', today + 'T00:00:00').lte('logged_at', today + 'T23:59:59');
+  const { data: monthLogs } = await sb.from('daily_logs').select('user_id, logged_at').gte('logged_at', monthStart);
+  const todaySet = new Set((todayLogs || []).map(l => l.user_id));
+  const byUser = {};
+  (monthLogs || []).forEach(l => { if (!byUser[l.user_id]) byUser[l.user_id] = []; byUser[l.user_id].push(l); });
+  let loggedToday = 0, totalStreak = 0;
+  el.innerHTML = '';
+  profiles.forEach(p => {
+    const did = todaySet.has(p.id);
+    const streak = calcStreak(byUser[p.id] || []);
+    if (did) loggedToday++;
+    totalStreak += streak;
+    const div = document.createElement('div');
+    div.className = 'student-row';
+    div.innerHTML = '<div><div class="s-name">' + p.name + '</div><div class="s-email">' + p.email + '</div></div><div class="s-streak">' + streak + '</div><div><span class="badge ' + (did ? 'badge-yes' : 'badge-no') + '">' + (did ? 'Logged' : 'Missed') + '</span></div>';
+    el.appendChild(div);
+  });
+  document.getElementById('t-total').textContent = profiles.length;
+  document.getElementById('t-logged').textContent = loggedToday;
+  document.getElementById('t-avg').textContent = profiles.length ? Math.round(totalStreak / profiles.length) : 0;
+  const { count } = await sb.from('reviews').select('*', { count: 'exact', head: true });
+  document.getElementById('t-reviews').textContent = count || 0;
+}
+
+// TEACHER: BROADCAST
+document.getElementById('btn-broadcast').addEventListener('click', async () => {
+  const msg = document.getElementById('broadcast-msg').value.trim();
+  if (!msg) { alert('Please type a message.'); return; }
+  const { error } = await sb.from('broadcasts').insert({ message: msg });
+  const ok = document.getElementById('broadcast-ok');
+  ok.textContent = error ? 'Failed to send.' : '✓ Sent to all students.';
+  ok.style.display = 'block';
+});
+
+// TEACHER: REVIEWS
+async function loadTeacherReviews() {
+  const el = document.getElementById('reviews-list');
+  el.innerHTML = '<div class="loading-txt">Loading...</div>';
+  const { data: reviews } = await sb.from('reviews').select('rating, review_text, created_at').order('created_at', { ascending: false });
+  if (!reviews || !reviews.length) { el.innerHTML = '<div class="empty">No reviews yet</div>'; return; }
+  el.innerHTML = '';
+  reviews.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML = '<div class="log-date">' + new Date(r.created_at).toLocaleDateString() + '</div><div>' + '⭐'.repeat(r.rating) + '</div><div class="log-text">' + (r.review_text || '(No comment)') + '</div>';
+    el.appendChild(div);
+  });
+}
+
+// INIT
+const { data: { session } } = await sb.auth.getSession();
+if (session) { USER = session.user; await routeUser(); }
+else { show('screen-landing'); }
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session && !USER) { USER = session.user; await routeUser(); }
+  else if (event === 'SIGNED_OUT') { show('screen-landing'); }
+});
+</script>
+</body>
+</html>
